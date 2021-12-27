@@ -1,0 +1,53 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-md bg-white navbar-dark" style="box-shadow: 3px 3px 3px #cccccc; height: 70px; border-radius: 0px 0px 20px 20px;">
+    <div class="container">
+
+        <a href="{% url 'index' %}">
+            <img src="{% static 'img/logo.png' %}" style="height: 100%; width: 150px;" alt="">
+        </a>
+
+        <button class="navbar-toggler text-primary bg-primary" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon text-primary"></span>
+        </button>
+        <div class="collapse navbar-collapse text-right" id="collapsibleNavbar">
+            <div style="width: 100%">
+                <ul class="navbar-nav d-flex justify-content-end">
+                    <li class="nav-item">
+                        <a href="{% url 'department' %}" class="m-0 p-0">
+                            <button type="button" style="border: solid 1px white;" class="mx-2 btn btn-primary">Department</button>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{% url 'main' %}" class="m-0 p-0">
+                            <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Society</button>
+                        </a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a href="{% url 'logout' %}" class="m-0 p-0">
+                                <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Logout</button>
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a href="{% url 'login' %}" class="m-0 p-0">
+                                <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Login</button>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{% url 'signup' %}" class="m-0 p-0">
+                                <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Sign Up</button>
+                            </a>
+                        </li>  
+
+                    {% endif %}
+                </ul>
+            </div>
+        </div>  
+    </div>
+ 
+  </nav>
+
+
