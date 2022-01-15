@@ -12,7 +12,9 @@ urlpatterns = [
     path('dept-submit-response/', views.dept_submit_response, name="dept-submit-response"),
     path('main/', views.main, name="main"),
     path('department/', views.department, name="department"),
-    path('department-result/', views.department_result, name="department-result")
+    path('department-result/', views.department_result, name="department-result"),
+    path('admin-portal/', views.admin_portal, name="admin-portal")
+
 ]
 
 urlpatterns = urlpatterns + static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

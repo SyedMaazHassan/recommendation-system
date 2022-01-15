@@ -13,18 +13,27 @@
         <div class="collapse navbar-collapse text-right" id="collapsibleNavbar">
             <div style="width: 100%">
                 <ul class="navbar-nav d-flex justify-content-end">
-                    <li class="nav-item">
-                        <a href="{% url 'department' %}" class="m-0 p-0">
-                            <button type="button" style="border: solid 1px white;" class="mx-2 btn btn-primary">Department</button>
-                        </a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a href="{% url 'main' %}" class="m-0 p-0">
-                            <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Society</button>
-                        </a>
-                    </li>
+                    
                     {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a href="{% url 'department' %}" class="m-0 p-0">
+                                <button type="button" style="border: solid 1px white;" class="mx-2 btn btn-primary">Department</button>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{% url 'main' %}" class="m-0 p-0">
+                                <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Society</button>
+                            </a>
+                        </li>
+
+                        {% if user.is_superuser %}
+                            <li class="nav-item">
+                                <a href="{% url 'admin-portal' %}" class="m-0 p-0">
+                                    <button type="button" style="border: solid 1px white; width: 150px;" class="mx-2 btn btn-primary">Admin portal</button>
+                                </a>
+                            </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a href="{% url 'logout' %}" class="m-0 p-0">
                                 <button type="button" style="border: solid 1px white; width: 100px;" class="mx-2 btn btn-primary">Logout</button>

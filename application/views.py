@@ -9,6 +9,122 @@ from django.contrib.auth.decorators import login_required
 import os
 # main page function
 
+def get_bs4_version(fig_object):
+    import io, base64
+    flike = io.BytesIO()
+    fig_object.savefig(flike)
+    b64 = base64.b64encode(flike.getvalue()).decode()
+    return b64
+
+def get_accuracy():
+    # import packages
+    from sklearn.model_selection import train_test_split
+    from sklearn.preprocessing import StandardScaler 
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.naive_bayes import BernoulliNB
+    import matplotlib.pyplot as plt
+    from sklearn.metrics import plot_confusion_matrix
+    from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
+    import pandas as pd
+    import io, base64
+
+    base_dir = settings.BASE_DIR
+    csv_path = os.path.join(base_dir, "static", "Department_root.csv")
+
+    # import dataset
+    department_data = pd.read_csv(csv_path)
+
+    # Spliting the input and output from the dataset
+    # input columns
+    X = department_data.drop(columns=['Suggestion'])
+    # output column
+    y = department_data['Suggestion']
+
+
+    # split data into train and test sets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10,random_state=0)
+
+
+    # Standardize the data set
+    SC_X=StandardScaler()
+    X_train_Scaled=SC_X.fit_transform(X_train)
+    X_test=Scaled=SC_X.transform(X_test)
+
+
+    # Select ML classifiers
+    classifiers=[ BernoulliNB(),LogisticRegression(solver="liblinear",max_iter=100)]
+
+    graph_list = []
+    # Print the confusion matrix using Matplotlib
+    for clf in classifiers:
+        clf.fit(X_train, y_train)
+        y_pred = clf.predict(X_test)
+        fig1, ax = plt.subplots(figsize=(15, 10))
+        fig=plot_confusion_matrix(clf, X_test, y_test, display_labels=["Business Studies","Computer Sciences","Engineering Studies","Fashion Design","Media Studies"], ax=ax)
+        fig.figure_.suptitle("Confusion Matrix for  " + str(clf))
+        bs4 = get_bs4_version(fig1)
+
+        my_obj = {
+            'img': bs4,
+            'params': [
+                {
+                    'name': 'Precision',
+                    'value': precision_score(y_test, y_pred, average='macro')
+                },
+                {
+                    'name': 'Recall',
+                    'value': recall_score(y_test, y_pred, average='macro')
+                },
+                {
+                    'name': 'Accuracy',
+                    'value': accuracy_score(y_test, y_pred)
+                },
+                {
+                    'name': 'F1 Score',
+                    'value': f1_score(y_test, y_pred, average='macro')
+                },
+            ]
+        }
+
+    
+        
+        # plt.show()
+
+        # print()
+    
+        # # Print Precision
+        # print('Precision: %.3f' % precision_score(y_test, y_pred, average='macro'))
+
+        # # Print Recall
+        # print('Recall: %.3f' % recall_score(y_test, y_pred, average='macro'))
+
+        # # Print Accuracy
+        # print('Accuracy: %.3f' % accuracy_score(y_test, y_pred))
+
+        # # Print F1 Score
+        # print('F1 Score: %.3f' % f1_score(y_test, y_pred, average='macro'))
+        graph_list.append(my_obj)
+
+        # print()
+    
+    return graph_list
+
+
+
+def admin_portal(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        my_graph_list = get_accuracy()
+        context = {
+            'graph_list': my_graph_list,
+            'registered_users': User.objects.all().count() - 1,
+            'visits': Visit.objects.all().count()
+        }
+        return render(request, "admin.html", context)
+
+    return redirect("index")
+
+
+
 def calculate_response(answers_array):
     base_dir = settings.BASE_DIR
     csv_path = os.path.join(base_dir, "static", "society_root.csv")
@@ -100,6 +216,7 @@ def submit_response(request):
         return JsonResponse(output)
 
 def index(request):
+    Visit.objects.create()
     # return render(request, "signin.html")
     if request.user.is_authenticated:
         return redirect("main")
@@ -107,7 +224,7 @@ def index(request):
     return render(request, 'index.html')
 
 
-
+@login_required
 def main(request):
     all_questions = Question.objects.all()
     context = {
@@ -190,6 +307,7 @@ def logout(request):
 
 
 
+@login_required
 def department(request):
     all_questions = Dept_Question.objects.all()
     context = {
@@ -255,41 +373,41 @@ def dept_submit_response(request):
     }
 
     if request.method == "GET":
-            response = request.GET.get("response")
-            if response:
-                response = json.loads(response)
+        response = request.GET.get("response")
+        if response:
+            response = json.loads(response)
 
-                if request.user.is_authenticated:
-                    new_response = Dept_UserResponse(user = request.user)
-                else:
-                    new_response = Dept_UserResponse()
+            if request.user.is_authenticated:
+                new_response = Dept_UserResponse(user = request.user)
+            else:
+                new_response = Dept_UserResponse()
 
-                new_response.save()
+            new_response.save()
 
-                answers_array = []
-                
-                for i in response:
-                    question_id = i['question']
-                    answer_id = i['answer']
+            answers_array = []
+            
+            for i in response:
+                question_id = i['question']
+                answer_id = i['answer']
 
-                    question = Dept_Question.objects.get(id = question_id)
-                    answer = Dept_Answer.objects.get(id = answer_id)
+                question = Dept_Question.objects.get(id = question_id)
+                answer = Dept_Answer.objects.get(id = answer_id)
 
-                    new_response.question_answers.create(
-                        question = question,
-                        answer = answer
-                    )
+                new_response.question_answers.create(
+                    question = question,
+                    answer = answer
+                )
 
-                    answers_array.append(answer.boolean)
+                answers_array.append(answer.boolean)
 
-                new_response.save()
-                print(answers_array)
-                model_output = dept_calculate_response(answers_array)
-                output['response'] = model_output
+            new_response.save()
+            print(answers_array)
+            model_output = dept_calculate_response(answers_array)
+            output['response'] = model_output
 
-                output['status'] = True
-                return JsonResponse(output)
+            output['status'] = True
 
-                return render(request,"department_result.html",{'model_output':model_output})
+    return JsonResponse(output)
+
 
                 

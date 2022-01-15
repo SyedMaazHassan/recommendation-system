@@ -42,6 +42,8 @@ class UserResponse(models.Model):
 
 
 # models for career recommendation
+class Visit(models.Model):
+    timestamp = models.DateTimeField(default = timezone.now)
 
 class Dept_Answer(models.Model):
     text = models.CharField(max_length = 255)
